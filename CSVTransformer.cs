@@ -18,6 +18,7 @@ namespace CSVTransformer
         string OutputFormat;
         Format OFmt;
         bool Verbose = true;
+        bool ForceAddSeparators = false;
 
         enum Format
         {
@@ -37,6 +38,7 @@ namespace CSVTransformer
             try
             {
                 Verbose &= !CheckOpt(args, "-q");
+                ForceAddSeparators = CheckOpt(args, "-f");
                 Info();
                 InputFile = TryGetArg(args, 0);
                 InputFormat = TryGetArg(args, 1);
@@ -104,9 +106,12 @@ namespace CSVTransformer
             for (int i=0;i<t.Count;i++)
             {
                 var s = t[i];
-                if (s.Contains(seps) && !s.StartsWith("\""))
+                if (!s.StartsWith("\""))
                 {
-                    t[i] = "\"" + s + "\"";
+                    if (s.Contains(seps) || ForceAddSeparators)
+                    {
+                        t[i] = "\"" + s + "\"";
+                    }
                 }
             }
             while (t.Count < nbc)
@@ -199,9 +204,10 @@ namespace CSVTransformer
         void Usage()
         {
             Ln("command line syntax: inputFile inputFileFormat outputFile outputFileFormat [opts]");
-            Ln("inputFileFormat,outputFileFormat: csv | semicolon | tab | space");
+            Ln("inputFileFormat,outputFileFormat: comma | semicolon | tab | space");
             Ln("opts:");
             Ln("-q : supress all outputs except errors");
+            Ln("-f : force add of separators");
             Ln();
         }
 
